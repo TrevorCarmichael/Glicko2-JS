@@ -122,9 +122,11 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
             
             newPlayers.push({
                 name: player.name,
-                rating: Number.parseFloat(newRating.toFixed(2)),
-                rd: Number.parseFloat(newRD.toFixed(2)),
-                volatility: Number.parseFloat(newVolatility.toFixed(5))
+                rating: Number.parseFloat(newRating),
+                rd: Number.parseFloat(newRD),
+                volatility: Number.parseFloat(newVolatility),
+                mu: Number.parseFload(newMu),
+                phi: Number.parseFloat(newPhi)
             });
         } else {
             let newPhi = Math.sqrt(Math.pow(player.phi, 2) + Math.pow(player.volatility, 2));
@@ -133,10 +135,10 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
             newPlayers.push({
                 name: player.name,
                 rating: Number.parseFloat(player.rating),
-                rd: Number.parseFloat(newRD.toFixed(2)),
+                rd: Number.parseFloat(newRD),
                 volatility: Number.parseFloat(player.volatility),
                 mu: (player.rating - 1500)/173.7178,
-                phi: newRD.toFixed(2)/173.7178
+                phi: newRD/173.7178
             });
         }
     });

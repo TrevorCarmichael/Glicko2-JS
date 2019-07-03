@@ -120,7 +120,6 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
             let newRD = 173.7178 * newPhi;
             let newRating = 173.7178 * newMu + 1500;
             
-            console.log(newVolatility)
             newPlayers.push({
                 name: player.name,
                 rating: Number.parseFloat(newRating.toFixed(2)),

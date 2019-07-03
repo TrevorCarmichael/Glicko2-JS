@@ -1,6 +1,6 @@
 {
   "name": "glicko2-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Glicko2 implementation in JavaScript",
   "main": "glicko2.js",
   "scripts": {

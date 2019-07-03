@@ -12,5 +12,6 @@
     "rating"
   ],
   "author": "Trevor Carmichael",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": "github:Googlrr/Glicko2-JS"
 }

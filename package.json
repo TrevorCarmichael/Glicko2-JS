@@ -1,0 +1,16 @@
+{
+  "name": "glicko2-js",
+  "version": "1.0.0",
+  "description": "A Glicko2 implementation in JavaScript",
+  "main": "glicko2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "glicko",
+    "glicko2",
+    "rating"
+  ],
+  "author": "Trevor Carmichael",
+  "license": "ISC"
+}

@@ -125,7 +125,7 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
                 rating: Number.parseFloat(newRating),
                 rd: Number.parseFloat(newRD),
                 volatility: Number.parseFloat(newVolatility),
-                mu: Number.parseFload(newMu),
+                mu: Number.parseFloat(newMu),
                 phi: Number.parseFloat(newPhi)
             });
         } else {

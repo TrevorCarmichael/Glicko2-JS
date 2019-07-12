@@ -147,4 +147,77 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
     this.matches = [];
 }
 
+Glicko.prototype.calculateScore = function calculateScore(player1, player2, result) {
+    let matchResult = (result===undefined) ? 1 : result;
+    let g = (phi) => 1 / Math.sqrt(1 + (3 * Math.pow(phi, 2) / Math.pow(Math.PI, 2)));
+    let E = (mu, muj, phi) => 1 / (1 + Math.exp(-1 * g(phi) * (mu - muj)));
+    let v = (mu, muj, phi) => Math.pow(g(phi),2) * E(mu, muj, phi) * (1 - E(mu, muj, phi));
+    let delta = (mu, muj, phi, score) => g(phi) * (score - E(mu, muj, phi));
+    let a = (vol) => Math.log(Math.pow(vol, 2));
+    let f_base = (delta, phi, v, a) => (x) => (
+        (Math.pow(Math.E, x) * (Math.pow(delta, 2) - Math.pow(phi, 2) - v - Math.pow(Math.E, x)))/
+        (2 * Math.pow((Math.pow(phi, 2) + v + Math.pow(Math.E, x)),2))) - ( (x-a) / Math.pow(this.tau,2) ); //what
+    let epsilon = 0.000001;
+
+    let player = player1;
+    let opponent = player2;
+    
+    player.mu = (player.rating - 1500)/173.7178;
+    player.phi = player.rd/173.7178;
+    opponent.mu = (opponent.rating - 1500)/173.7178;
+    opponent.phi = opponent.rd/173.7178;
+
+    let vtotal = 0;
+    let deltaTotal = 0;
+    let hasPlayed = false;
+    
+    vtotal += v(player.mu, opponent.mu, opponent.phi);
+    deltaTotal += delta(player.mu, opponent.mu, opponent.phi, matchResult);
+    vtotal = Math.pow(vtotal, -1);
+
+    let preDelta = deltaTotal;
+    deltaTotal = deltaTotal * vtotal;
+    let f = f_base(deltaTotal, player.phi, vtotal, a(player.volatility));
+    let A = a(player.volatility);
+    let B;
+    if(Math.pow(delta, 2) > (Math.pow(player.phi, 2) + v)) {
+        B = Math.log(Math.pow(delta, 2) - Math.pow(player.phi, 2) - vtotal);
+    } else {
+        let k = 1;
+        while(f(a(player.volatility) - k * this.tau) < 0){
+            k +=1;
+        }
+        B = a(player.volatility) - (k * this.tau);
+    }
+    let fA = f(A);
+    let fB = f(B);
+
+    while(Math.abs(B - A) > epsilon) {
+        let C = A + (((A - B) * fA) / (fB - fA));
+
+        let fC = f(C);
+        if((fC * fB) < 0) {
+            A = B;
+            fA = fB;
+        } else {
+            fA = fA / 2;
+        }
+        B = C;
+        fB = fC;
+    }
+
+    let newVolatility = Math.pow(Math.E, A.toFixed(5) / 2);
+    let prePhi = Math.sqrt(Math.pow(player.phi, 2) + Math.pow(newVolatility, 2));
+    let newPhi = 1 / Math.sqrt((1/Math.pow(prePhi,2)) + (1/vtotal));
+    let newMu = player.mu + Math.pow(newPhi, 2) * (preDelta);
+    let newRD = 173.7178 * newPhi;
+    let newRating = 173.7178 * newMu + 1500;
+
+    return {
+        rating: Number.parseFloat(newRating),
+        rd: Number.parseFloat(newRD),
+        volatility: Number.parseFloat(newVolatility)
+    }
+
+}
 module.exports = Glicko;

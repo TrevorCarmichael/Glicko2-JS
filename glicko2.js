@@ -73,80 +73,90 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
     this.players.forEach((player) => {
         let vtotal = 0;
         let deltaTotal = 0;
-        let hasPlayed = false;
+
         this.matches.filter(x => x.user === player.name).forEach((match) => {
             let opponent = this.getPlayerByName(match.opponent);
             vtotal += v(player.mu, opponent.mu, opponent.phi);
             deltaTotal += delta(player.mu, opponent.mu, opponent.phi, match.result);
-            hasPlayed = true;
+
         });
-        if(hasPlayed){
-            vtotal = Math.pow(vtotal, -1);
-            let preDelta = deltaTotal;
-            deltaTotal = deltaTotal * vtotal;
-            let f = f_base(deltaTotal, player.phi, vtotal, a(player.volatility));
-            let A = a(player.volatility);
-            let B;
-            if(Math.pow(delta, 2) > (Math.pow(player.phi, 2) + v)) {
-                B = Math.log(Math.pow(delta, 2) - Math.pow(player.phi, 2) - vtotal);
-            } else {
-                let k = 1;
-                while(f(a(player.volatility) - k * this.tau) < 0){
-                    k +=1;
-                }
-                B = a(player.volatility) - (k * this.tau);
-            }
-            let fA = f(A);
-            let fB = f(B);
-
-            while(Math.abs(B - A) > epsilon) {
-                let C = A + (((A - B) * fA) / (fB - fA));
-
-                let fC = f(C);
-                if((fC * fB) < 0) {
-                    A = B;
-                    fA = fB;
-                } else {
-                    fA = fA / 2;
-                }
-                B = C;
-                fB = fC;
-            }
-
-            let newVolatility = Math.pow(Math.E, A.toFixed(5) / 2);
-            let prePhi = Math.sqrt(Math.pow(player.phi, 2) + Math.pow(newVolatility, 2));
-            let newPhi = 1 / Math.sqrt((1/Math.pow(prePhi,2)) + (1/vtotal));
-            let newMu = player.mu + Math.pow(newPhi, 2) * (preDelta);
-            let newRD = 173.7178 * newPhi;
-            let newRating = 173.7178 * newMu + 1500;
-            
-            newPlayers.push({
-                name: player.name,
-                rating: Number.parseFloat(newRating),
-                rd: Number.parseFloat(newRD),
-                volatility: Number.parseFloat(newVolatility),
-                mu: Number.parseFloat(newMu),
-                phi: Number.parseFloat(newPhi)
-            });
+    
+        vtotal = Math.pow(vtotal, -1);
+        let preDelta = deltaTotal;
+        deltaTotal = deltaTotal * vtotal;
+        let f = f_base(deltaTotal, player.phi, vtotal, a(player.volatility));
+        let A = a(player.volatility);
+        let B;
+        if(Math.pow(delta, 2) > (Math.pow(player.phi, 2) + v)) {
+            B = Math.log(Math.pow(delta, 2) - Math.pow(player.phi, 2) - vtotal);
         } else {
-            let newPhi = Math.sqrt(Math.pow(player.phi, 2) + Math.pow(player.volatility, 2));
-            let newRD = 173.7178 * newPhi;
-
-            newPlayers.push({
-                name: player.name,
-                rating: Number.parseFloat(player.rating),
-                rd: Number.parseFloat(newRD),
-                volatility: Number.parseFloat(player.volatility),
-                mu: (player.rating - 1500)/173.7178,
-                phi: newRD/173.7178
-            });
+            let k = 1;
+            while(f(a(player.volatility) - k * this.tau) < 0){
+                k +=1;
+            }
+            B = a(player.volatility) - (k * this.tau);
         }
+        let fA = f(A);
+        let fB = f(B);
+
+        while(Math.abs(B - A) > epsilon) {
+            let C = A + (((A - B) * fA) / (fB - fA));
+
+            let fC = f(C);
+            if((fC * fB) < 0) {
+                A = B;
+                fA = fB;
+            } else {
+                fA = fA / 2;
+            }
+            B = C;
+            fB = fC;
+        }
+
+        let newVolatility = Math.pow(Math.E, A.toFixed(5) / 2);
+        let prePhi = Math.sqrt(Math.pow(player.phi, 2) + Math.pow(newVolatility, 2));
+        let newPhi = 1 / Math.sqrt((1/Math.pow(prePhi,2)) + (1/vtotal));
+        let newMu = player.mu + Math.pow(newPhi, 2) * (preDelta);
+        let newRD = 173.7178 * newPhi;
+        let newRating = 173.7178 * newMu + 1500;
+        
+        newPlayers.push({
+            name: player.name,
+            rating: Number.parseFloat(newRating),
+            rd: Number.parseFloat(newRD),
+            volatility: Number.parseFloat(newVolatility),
+            mu: Number.parseFloat(newMu),
+            phi: Number.parseFloat(newPhi)
+        });
+        
     });
 
     this.players = newPlayers;
     this.matches = [];
 }
 
+Glicko.prototype.calculateInactiveUsers = function calculateInactive(players) {
+    let newPhi = (player) => Math.sqrt(Math.pow(player.phi, 2) + Math.pow(player.volatility, 2));
+    let newRD = (phi) => 173.7178 * phi;
+    let newPlayers = [];
+
+    players.forEach((player) => {
+        let phi = newPhi(player);
+        let rd = newRD(phi);
+
+        newPlayers.push({
+            name: player.name,
+            rating: player.rating,
+            rd: Number.parseFloat(rd),
+            volatility: player.volatility,
+            mu: player.me,
+            phi: phi/173.7178
+        });
+
+    });
+    
+    return newPlayers;
+}
 Glicko.prototype.calculateScore = function calculateScore(player1, player2, result) {
     let matchResult = (result===undefined) ? 1 : result;
     let g = (phi) => 1 / Math.sqrt(1 + (3 * Math.pow(phi, 2) / Math.pow(Math.PI, 2)));

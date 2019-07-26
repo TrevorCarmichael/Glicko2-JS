@@ -1,62 +1,28 @@
+const ratingToMu = (rating) => (rating - 1500)/173.7178;
+const rdToPhi = (rd) => rd/173.7178;
 
 function Glicko(tau){
     if(tau===undefined)
         this.tau = 0.5; 
     else
         this.tau = tau;
-
-    this.players = [];
-    this.matches = [];
 }
 
-Glicko.prototype.addPlayer = function addPlayer(name, rating, rd, volatility){
-    this.players.push({
+
+
+Glicko.prototype.formatPlayer = function addPlayer(name, rating, rd, volatility){
+    return {
         name: name, 
         rating: rating,
         rd: rd,
         volatility: volatility,
-        mu: (rating - 1500)/173.7178,
-        phi: rd/173.7178
-    });
+        mu: ratingToMu(rating),
+        phi: rdToPhi(rd)
+    };
 }
 
-Glicko.prototype.getPlayers = function getPlayers(){
-    return this.players;
-}
-Glicko.prototype.getPlayerByName = function getPlayerByName(name) {
-    return this.players.find(x => x.name === name);
-}
+Glicko.prototype.calculateRankings = function calculateRankings(players, matches) {
 
-Glicko.prototype.addMatch = function addMatch(winner, loser, tie){
-    if(tie===true) {
-        this.matches.push({
-            user: winner,
-            opponent: loser,
-            result: 0.5
-        });
-        this.matches.push({
-            user: loser,
-            opponent: winner,
-            result: 0.5
-        });
-    } else {
-        this.matches.push({
-            user: winner,
-            opponent: loser, 
-            result: 1
-        });
-        this.matches.push({
-            user: loser,
-            opponent: winner, 
-            result: 0
-        });
-    }
-}
-Glicko.prototype.output = function output(){
-    console.log(this.players);
-}
-
-Glicko.prototype.calculateRankings = function calculateRankings() {
     let g = (phi) => 1 / Math.sqrt(1 + (3 * Math.pow(phi, 2) / Math.pow(Math.PI, 2)));
     let E = (mu, muj, phi) => 1 / (1 + Math.exp(-1 * g(phi) * (mu - muj)));
     let v = (mu, muj, phi) => Math.pow(g(phi),2) * E(mu, muj, phi) * (1 - E(mu, muj, phi));
@@ -70,14 +36,17 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
 
     let newPlayers = [];
 
-    this.players.forEach((player) => {
+    players.forEach((player) => {
         let vtotal = 0;
         let deltaTotal = 0;
 
-        this.matches.filter(x => x.user === player.name).forEach((match) => {
-            let opponent = this.getPlayerByName(match.opponent);
+        matches.filter(x => (x[0] === player.name) || (x[1] === player.name)).forEach((match) => {
+            let findPlayer = (name) => players.find((p) => p.name === name);
+            let result = (match[2]) ? match[2] : ((player.name) === match[0] ? 1 : 0);
+            let opponent = (player.name === match[0]) ? findPlayer(match[1]) : findPlayer(match[0]);
+            
             vtotal += v(player.mu, opponent.mu, opponent.phi);
-            deltaTotal += delta(player.mu, opponent.mu, opponent.phi, match.result);
+            deltaTotal += delta(player.mu, opponent.mu, opponent.phi, result);
 
         });
     
@@ -131,8 +100,7 @@ Glicko.prototype.calculateRankings = function calculateRankings() {
         
     });
 
-    this.players = newPlayers;
-    this.matches = [];
+    return newPlayers;
 }
 
 Glicko.prototype.calculateInactiveUsers = function calculateInactive(players) {

@@ -1,5 +1,18 @@
 const ratingToMu = (rating) => (rating - 1500)/173.7178;
 const rdToPhi = (rd) => rd/173.7178;
+const sq = (x) => Math.pow(x,2);
+
+//Glicko functions
+const g = (phi) => 1 / Math.sqrt(1 + (3 * sq(phi) / sq(Math.PI)));
+const E = (mu1, mu2, phi1) => 1 / (1 + Math.exp(-1 * g(phi1) * (mu1 - mu2)));
+const v = (mu1, mu2, phi1) => sq(g(phi1)) * E(mu1, mu2, phi1) * (1 - E(mu1, mu2, phi1));
+const delta = (mu1, mu2, phi1, score) => g(phi1) * (score - E(mu1, mu2, phi1));
+const a = (vol) => Math.log(sq(vol));
+const epsilon = 0.000001;
+const f_base = (delta, phi, v, a) => (x) => (
+    (Math.pow(Math.E, x) * (sq(delta) - sq(phi) - v - Math.pow(Math.E, x)))/
+    (2 * Math.pow((sq(phi) + v + sq(Math.E, x))))) - ( (x-a) / sq(this.tau) ); //what
+
 
 function Glicko(tau){
     if(tau===undefined)
@@ -22,17 +35,6 @@ Glicko.prototype.formatPlayer = function addPlayer(name, rating, rd, volatility)
 }
 
 Glicko.prototype.calculateRankings = function calculateRankings(players, matches) {
-
-    let g = (phi) => 1 / Math.sqrt(1 + (3 * Math.pow(phi, 2) / Math.pow(Math.PI, 2)));
-    let E = (mu, muj, phi) => 1 / (1 + Math.exp(-1 * g(phi) * (mu - muj)));
-    let v = (mu, muj, phi) => Math.pow(g(phi),2) * E(mu, muj, phi) * (1 - E(mu, muj, phi));
-    let delta = (mu, muj, phi, score) => g(phi) * (score - E(mu, muj, phi));
-    let a = (vol) => Math.log(Math.pow(vol, 2));
-    let f_base = (delta, phi, v, a) => (x) => (
-        (Math.pow(Math.E, x) * (Math.pow(delta, 2) - Math.pow(phi, 2) - v - Math.pow(Math.E, x)))/
-        (2 * Math.pow((Math.pow(phi, 2) + v + Math.pow(Math.E, x)),2))) - ( (x-a) / Math.pow(this.tau,2) ); //what
-    let epsilon = 0.000001;
-
 
     let newPlayers = [];
 

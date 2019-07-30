@@ -23,7 +23,7 @@ function Glicko(tau){
 
 
 
-Glicko.prototype.formatPlayer = function addPlayer(name, rating, rd, volatility){
+Glicko.prototype.formatPlayer = function addPlayer(name, rating = 1500, rd = 200, volatility = 0.06){
     return {
         name: name, 
         rating: rating,

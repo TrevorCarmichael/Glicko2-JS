@@ -4,7 +4,7 @@
   "description": "A Glicko2 implementation in JavaScript",
   "main": "glicko2.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "keywords": [
     "glicko",
@@ -13,5 +13,9 @@
   ],
   "author": "Trevor Carmichael",
   "license": "ISC",
-  "repository": "github:Googlrr/Glicko2-JS"
+  "repository": "github:Googlrr/Glicko2-JS",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0"
+  }
 }

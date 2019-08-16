@@ -43,7 +43,7 @@ Glicko.prototype.calculateRankings = function calculateRankings(players, matches
         let deltaTotal = 0;
 
         matches.filter(x => (x[0] === player.name) || (x[1] === player.name)).forEach((match) => {
-            let findPlayer = (name) => players.find((p) => p.name === name);
+            let findPlayer = (name) => players.find((p) => p.name.toLowerCase() === name.toLowerCase());
             let result = (match[2]) ? match[2] : ((player.name) === match[0] ? 1 : 0);
             let opponent = (player.name === match[0]) ? findPlayer(match[1]) : findPlayer(match[0]);
             

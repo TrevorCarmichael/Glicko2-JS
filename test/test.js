@@ -23,15 +23,48 @@ describe('Glicko-2', function (){
         });
         it('should return 1698 rating for player 1', function(){
             let newPlayers = ratings.calculateRankings(players, matches);
-            newPlayers[0].rating.should.be.closeTo(1698.6285, 0.0001);
+            newPlayers[0].rating.should.be.closeTo(1698.6285, 1);
         });
         it('should return 139.84 rd for player 1', function(){
             let newPlayers = ratings.calculateRankings(players, matches);
-            newPlayers[0].rd.should.be.closeTo(139.8495, 0.0001);
+            newPlayers[0].rd.should.be.closeTo(139.8495, 0.01);
         });
         it('should return 0.06 volatility for player 1', function(){
             let newPlayers = ratings.calculateRankings(players, matches);
             newPlayers[0].volatility.should.be.closeTo(0.06, 0.0001);
+        });
+        it('should return 0.05999 for volatility based on values from the Glicko2 example', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("One", 1500, 200, 0.06), ratings2.formatPlayer("Two", 1400, 30, 0.06),
+                ratings2.formatPlayer("Three", 1550, 100, 0.06), ratings2.formatPlayer("Four", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["One", "Two"],["Three", "One"],["Four", "One"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].volatility.should.be.closeTo(0.05999, 0.00001);
+        });
+        it('should return 1464.06 for rating based on values from the Glicko2 example', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("One", 1500, 200, 0.06), ratings2.formatPlayer("Two", 1400, 30, 0.06),
+                ratings2.formatPlayer("Three", 1550, 100, 0.06), ratings2.formatPlayer("Four", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["One", "Two"],["Three", "One"],["Four", "One"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].rating.should.be.closeTo(1464.06, 0.01);
+        });
+        it('should return 151.52 for rd based on values from the Glicko2 example', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("One", 1500, 200, 0.06), ratings2.formatPlayer("Two", 1400, 30, 0.06),
+                ratings2.formatPlayer("Three", 1550, 100, 0.06), ratings2.formatPlayer("Four", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["One", "Two"],["Three", "One"],["Four", "One"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].rd.should.be.closeTo(151.52, 0.01);
         });
     });
 

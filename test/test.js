@@ -66,6 +66,39 @@ describe('Glicko-2', function (){
             let newPlayers = ratings2.calculateRankings(players, matches);
             newPlayers[0].rd.should.be.closeTo(151.52, 0.01);
         });
+        it('should return 0.05999 for volatility even if player case sensitivity does not match', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("oNe", 1500, 200, 0.06), ratings2.formatPlayer("twO", 1400, 30, 0.06),
+                ratings2.formatPlayer("ThREe", 1550, 100, 0.06), ratings2.formatPlayer("FoUr", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["OnE", "tWo"],["THreE", "One"],["FOur", "ONE"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].volatility.should.be.closeTo(0.05999, 0.00001);
+        });
+        it('should return 1464.06 for rating even if player case sensitivity does not match', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("oNe", 1500, 200, 0.06), ratings2.formatPlayer("twO", 1400, 30, 0.06),
+                ratings2.formatPlayer("ThREe", 1550, 100, 0.06), ratings2.formatPlayer("FoUr", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["OnE", "tWo"],["THreE", "One"],["FOur", "ONE"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].rating.should.be.closeTo(1464.06, 0.01);
+        });
+        it('should return 151.52 for rd even if player case sensitivity does not match', function(){
+            let ratings2 = new Glicko(0.5);
+            let players = [
+                ratings2.formatPlayer("oNe", 1500, 200, 0.06), ratings2.formatPlayer("twO", 1400, 30, 0.06),
+                ratings2.formatPlayer("ThREe", 1550, 100, 0.06), ratings2.formatPlayer("FoUr", 1700, 300, 0.06)
+            
+            ];
+            let matches = [["OnE", "tWo"],["THreE", "One"],["FOur", "ONE"]];
+            let newPlayers = ratings2.calculateRankings(players, matches);
+            newPlayers[0].rd.should.be.closeTo(151.52, 0.01);
+        });
     });
 
     describe('#calculateInactiveUsers()', function(){
